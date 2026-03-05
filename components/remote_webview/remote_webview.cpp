@@ -23,8 +23,8 @@ RemoteWebView *RemoteWebView::self_ = nullptr;
 void RemoteWebView::add_on_state_callback(std::function<void(bool)> &&callback) {
   this->state_callback_.add(std::move(callback));
 }
-void RemoteWebView::set_state(bool state) {
-  ESP_LOGD(TAG, "Set state to %s", TRUEFALSE(state));
+void RemoteWebView::trigger_on_frame_update(bool state) {
+  ESP_LOGD(TAG, "Triggering the automation with a %s value (value does not matter)", TRUEFALSE(state));
   this->state = state;
   this->state_callback_.call(state);
 }
