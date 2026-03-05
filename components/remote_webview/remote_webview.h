@@ -2,6 +2,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/display/display.h"
 #include "esphome/components/touchscreen/touchscreen.h"
+#include "esphome/core/helpers.h"
 #include "JPEGDEC.h"
 #include "protocol.h"
 #include "remote_webview_config.h"
@@ -53,6 +54,10 @@ class RemoteWebView : public Component {
   void dump_config() override;
   float get_setup_priority() const override { return setup_priority::LATE; }
 
+  // Automation on_update_frame things
+  void add_on_state_callback(std::function<void(bool)> &&callback);
+  void set_state(bool state);
+  bool state{false};
  private:
   struct WsMsg {
     uint8_t *buf{nullptr};
@@ -63,6 +68,9 @@ class RemoteWebView : public Component {
     uint8_t *buf{nullptr};
     size_t total{0}, filled{0};
   };
+
+  // Automation on_update_frame things
+  CallbackManager<void(bool)> state_callback_{};
 
   static constexpr bool     kCoalesceMoves  = cfg::coalesce_moves;
   static constexpr uint32_t kMoveRateHz     = cfg::move_rate_hz;
