@@ -98,22 +98,24 @@ REMOTEWEBVIEW_ACTION_SCHEMA = cv.maybe_simple_value(
     key=CONF_STATE,
 )
 
+# another condition automation element that we don't need
+"""
 REMOTEWEBVIEW_CONDITION_SCHEMA = automation.maybe_simple_id(
     {
         cv.Required(CONF_ID): cv.use_id(RemoteWebView),
     }
 )
-
+"""
 
 @automation.register_action(
-    "remote_webview.set_state",
+    "remote_webview.trigger_on_frame_update",
     OnFrameUpdateSetStateAction,
     REMOTEWEBVIEW_ACTION_SCHEMA,
 )
-async def remote_webview_set_state_to_code(config, action_id, template_arg, args):
+async def remote_webview_trigger_on_frame_update_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
-    cg.add(var.set_state(config[CONF_STATE]))
+    cg.add(var.trigger_on_frame_update(config[CONF_STATE]))
     return var
 
 # Trying to cull extra things in the Automation that might not be necessary
