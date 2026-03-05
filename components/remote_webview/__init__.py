@@ -108,14 +108,14 @@ REMOTEWEBVIEW_CONDITION_SCHEMA = automation.maybe_simple_id(
 """
 
 @automation.register_action(
-    "remote_webview.trigger_on_frame_update",
+    "remote_webview.frame_update_trigger",
     OnFrameUpdateSetStateAction,
     REMOTEWEBVIEW_ACTION_SCHEMA,
 )
-async def remote_webview_set_state_to_code(config, action_id, template_arg, args):
+async def remote_webview_frame_update_trigger_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
-    cg.add(var.trigger_on_frame_update(config[CONF_STATE]))
+    cg.add(var.frame_update_trigger(config[CONF_STATE]))
     return var
 
 # Trying to cull extra things in the Automation that might not be necessary
