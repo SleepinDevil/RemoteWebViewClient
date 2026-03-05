@@ -115,7 +115,8 @@ async def remote_webview_set_state_to_code(config, action_id, template_arg, args
     cg.add(var.set_state(config[CONF_STATE]))
     return var
 
-
+# Trying to cull extra things in the Automation that might not be necessary
+"""
 @automation.register_condition(
     "remote_webview.component_on",
     OnFrameUpdateCondition,
@@ -138,7 +139,7 @@ async def remote_webview_component_off_to_code(
 ):
     paren = await cg.get_variable(config[CONF_ID])
     return cg.new_Pvariable(condition_id, template_arg, paren, False)
-
+"""
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
