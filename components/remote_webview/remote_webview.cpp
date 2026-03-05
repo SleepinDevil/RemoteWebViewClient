@@ -19,6 +19,17 @@ namespace remote_webview {
 static const char *const TAG = "Remote_WebView";
 RemoteWebView *RemoteWebView::self_ = nullptr;
 
+//Below two functions are part of automation template testing
+void RemoteWebView::add_on_state_callback(std::function<void(bool)> &&callback) {
+  this->state_callback_.add(std::move(callback));
+}
+void RemoteWebView::set_state(bool state) {
+  ESP_LOGD(TAG, "Set state to %s", TRUEFALSE(state));
+  this->state = state;
+  this->state_callback_.call(state);
+}
+
+
 static inline void websocket_force_reconnect(esp_websocket_client_handle_t client) {
   if (!client) return;
   esp_websocket_client_stop(client);
