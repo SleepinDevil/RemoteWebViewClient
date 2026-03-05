@@ -14,7 +14,7 @@ template<typename... Ts> class OnFrameUpdateSetStateAction : public Action<Ts...
 
   void play(Ts... x) override {
     auto val = this->state_.value(x...);
-    this->ea_->set_state(val);
+    this->ea_->trigger_on_frame_update(val);
   }
 
  protected:
