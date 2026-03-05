@@ -112,7 +112,7 @@ REMOTEWEBVIEW_CONDITION_SCHEMA = automation.maybe_simple_id(
     OnFrameUpdateSetStateAction,
     REMOTEWEBVIEW_ACTION_SCHEMA,
 )
-async def remote_webview_trigger_on_frame_update_to_code(config, action_id, template_arg, args):
+async def remote_webview_set_state_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
     cg.add(var.trigger_on_frame_update(config[CONF_STATE]))
