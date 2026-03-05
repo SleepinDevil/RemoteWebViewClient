@@ -52,9 +52,10 @@ OnFrameUpdateSetStateAction = ns.class_(
     "OnFrameUpdateSetStateAction", automation.Action
 )
 # Conditions
-OnFrameUpdateCondition = ns.class_(
-    "OnFrameUpdateCondition", automation.Condition
-)
+# Culling conditions because we only have a simple trigger on our automation
+#OnFrameUpdateCondition = ns.class_(
+#    "OnFrameUpdateCondition", automation.Condition
+#)
 # Triggers
 OnFrameUpdateStateTrigger = ns.class_(
     "OnFrameUpdateStateTrigger", automation.Trigger.template(bool)
