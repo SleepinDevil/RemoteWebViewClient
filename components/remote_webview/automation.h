@@ -21,6 +21,8 @@ template<typename... Ts> class OnFrameUpdateSetStateAction : public Action<Ts...
   RemoteWebView *ea_;
 };
 
+// Trying to cull the condition part of the automation since we don't need that
+/*
 template<typename... Ts> class OnFrameUpdateCondition : public Condition<Ts...> {
  public:
   OnFrameUpdateCondition(RemoteWebView *parent, bool state) : parent_(parent), state_(state) {}
@@ -29,7 +31,7 @@ template<typename... Ts> class OnFrameUpdateCondition : public Condition<Ts...> 
  protected:
   RemoteWebView *parent_;
   bool state_;
-};
+}; */
 
 class OnFrameUpdateStateTrigger : public Trigger<bool> {
  public:
