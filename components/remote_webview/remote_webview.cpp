@@ -358,6 +358,9 @@ void RemoteWebView::process_frame_packet_(const uint8_t *data, size_t len)
     frame_stats_time_ += time_ms;
     frame_stats_count_++;
     ESP_LOGD(TAG, "frame %lu: tiles %u (%u bytes) - %lu ms", frame_id_, frame_tiles_, frame_bytes_, time_ms);
+
+    // LCD screen has had an update, lets trigger the automation
+    set_state(true);
   }
 }
 
