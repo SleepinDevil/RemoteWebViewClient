@@ -56,7 +56,7 @@ class RemoteWebView : public Component {
 
   // Automation on_update_frame things
   void add_on_state_callback(std::function<void(bool)> &&callback);
-  void set_state(bool state);
+  void trigger_on_frame_update(bool state);
   bool state{false};
  private:
   struct WsMsg {
