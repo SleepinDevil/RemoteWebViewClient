@@ -1,9 +1,10 @@
 import re
 import esphome.codegen as cg
 import esphome.config_validation as cv
+from esphome import automation
 from esphome.components import display, touchscreen
 from esphome.components.display import validate_rotation
-from esphome.const import CONF_ID, CONF_DISPLAY_ID, CONF_URL, CONF_ROTATION
+from esphome.const import CONF_ID, CONF_DISPLAY_ID, CONF_URL, CONF_ROTATION, CONF_STATE, CONF_TRIGGER_ID
 
 
 CONF_DEVICE_ID = "device_id"
@@ -18,6 +19,8 @@ CONF_MIN_FRAME_INTERVAL = "min_frame_interval"
 CONF_JPEG_QUALITY = "jpeg_quality"
 CONF_MAX_BYTES_PER_MSG = "max_bytes_per_msg"
 CONF_BIG_ENDIAN = "big_endian"
+
+CONF_ON_FRAME_UPDATE = "on_frame_update"
 
 _SERVER_RE = re.compile(
     r"^(?P<host>[A-Za-z0-9](?:[A-Za-z0-9\-\.]*[A-Za-z0-9])?)\:(?P<port>\d{1,5})$"
@@ -43,6 +46,20 @@ def validate_host_port(value):
 ns = cg.esphome_ns.namespace("remote_webview")
 RemoteWebView = ns.class_("RemoteWebView", cg.Component)
 
+# on_frame_update automation items
+# Actions
+OnFrameUpdateSetStateAction = ns.class_(
+    "OnFrameUpdateSetStateAction", automation.Action
+)
+# Conditions
+OnFrameUpdateCondition = ns.class_(
+    "OnFrameUpdateCondition", automation.Condition
+)
+# Triggers
+OnFrameUpdateStateTrigger = ns.class_(
+    "OnFrameUpdateStateTrigger", automation.Trigger.template(bool)
+)
+
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(RemoteWebView),
@@ -62,8 +79,66 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_MAX_BYTES_PER_MSG): cv.int_,
         cv.Optional(CONF_BIG_ENDIAN): cv.boolean,
         cv.Optional(CONF_ROTATION): validate_rotation,
+
+        
+        cv.Optional(CONF_ON_FRAME_UPDATE): automation.validate_automation(
+            {
+                cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(OnFrameUpdateStateTrigger),
+            }
+        ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
+
+REMOTEWEBVIEW_ACTION_SCHEMA = cv.maybe_simple_value(
+    {
+        cv.Required(CONF_ID): cv.use_id(RemoteWebView),
+        cv.Required(CONF_STATE): cv.boolean,
+    },
+    key=CONF_STATE,
+)
+
+REMOTEWEBVIEW_CONDITION_SCHEMA = automation.maybe_simple_id(
+    {
+        cv.Required(CONF_ID): cv.use_id(RemoteWebView),
+    }
+)
+
+
+@automation.register_action(
+    "remote_webview.set_state",
+    OnFrameUpdateSetStateAction,
+    REMOTEWEBVIEW_ACTION_SCHEMA,
+)
+async def remote_webview_set_state_to_code(config, action_id, template_arg, args):
+    paren = await cg.get_variable(config[CONF_ID])
+    var = cg.new_Pvariable(action_id, template_arg, paren)
+    cg.add(var.set_state(config[CONF_STATE]))
+    return var
+
+
+@automation.register_condition(
+    "remote_webview.component_on",
+    OnFrameUpdateCondition,
+    REMOTEWEBVIEW_CONDITION_SCHEMA,
+)
+async def remote_webview_component_on_to_code(
+    config, condition_id, template_arg, args
+):
+    paren = await cg.get_variable(config[CONF_ID])
+    return cg.new_Pvariable(condition_id, template_arg, paren, True)
+
+
+@automation.register_condition(
+    "remote_webview.component_off",
+    OnFrameUpdateCondition,
+    REMOTEWEBVIEW_CONDITION_SCHEMA,
+)
+async def remote_webview_component_off_to_code(
+    config, condition_id, template_arg, args
+):
+    paren = await cg.get_variable(config[CONF_ID])
+    return cg.new_Pvariable(condition_id, template_arg, paren, False)
+
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
@@ -102,3 +177,9 @@ async def to_code(config):
 
 
     await cg.register_component(var, config)
+
+    for conf in config.get(CONF_ON_FRAME_UPDATE, []):
+        trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
+        await automation.build_automation(trigger, [(bool, "x")], conf)
+
+
