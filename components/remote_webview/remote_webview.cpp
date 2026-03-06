@@ -29,9 +29,20 @@ void RemoteWebView::add_on_frame_update_callback(std::function<void()> &&callbac
 //}
 // MODIFIED: Renamed function and removed the 'state' logic. It simply fires the callbacks.
 void RemoteWebView::trigger_on_frame_update() {
+  uint32_t now = millis();
+  
+  // Check if 1000 milliseconds (1 second) has passed since the last trigger
+  if (now - this->last_trigger_ms_ < 1000) {
+    return; // Exit early without triggering the automation
+  }
+  
+  this->last_trigger_ms_ = now; // Update the tracking variable
+  
   ESP_LOGD(TAG, "Triggering the on_frame_update automation");
-  // this->state = state; // COMMENTED OUT: Unnecessary state assignment.
   this->on_frame_update_callback_.call();
+  // ESP_LOGD(TAG, "Triggering the on_frame_update automation");
+  // this->state = state; // COMMENTED OUT: Unnecessary state assignment.
+  //this->on_frame_update_callback_.call();
 }
 //void RemoteWebView::set_state(bool state) {
 //  ESP_LOGD(TAG, "Triggering the automation with a %s value (value does not matter)", TRUEFALSE(state));
