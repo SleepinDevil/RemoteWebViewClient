@@ -55,9 +55,14 @@ class RemoteWebView : public Component {
   float get_setup_priority() const override { return setup_priority::LATE; }
 
   // Automation on_update_frame things
-  void add_on_state_callback(std::function<void(bool)> &&callback);
-  void set_state(bool state);
-  bool state{false};
+  // MODIFIED: Removed the 'bool' argument from the std::function. It's now a pure event.
+  void add_on_frame_update_callback(std::function<void()> &&callback);
+  //void add_on_state_callback(std::function<void(bool)> &&callback);
+  // MODIFIED: Renamed to clearly state its purpose and removed the 'bool' argument.
+  void trigger_on_frame_update();
+  //void set_state(bool state);
+  //bool state{false}; // COMMENTED OUT: We do not need a state variable for a momentary event.
+
  private:
   struct WsMsg {
     uint8_t *buf{nullptr};
@@ -70,7 +75,9 @@ class RemoteWebView : public Component {
   };
 
   // Automation on_update_frame things
-  CallbackManager<void(bool)> state_callback_{};
+  // MODIFIED: Changed CallbackManager to no longer expect a boolean parameter.
+  CallbackManager<void()> on_frame_update_callback_{};
+  //CallbackManager<void(bool)> state_callback_{};
 
   static constexpr bool     kCoalesceMoves  = cfg::coalesce_moves;
   static constexpr uint32_t kMoveRateHz     = cfg::move_rate_hz;
