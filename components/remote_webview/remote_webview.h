@@ -78,6 +78,8 @@ class RemoteWebView : public Component {
   // MODIFIED: Changed CallbackManager to no longer expect a boolean parameter.
   CallbackManager<void()> on_frame_update_callback_{};
   //CallbackManager<void(bool)> state_callback_{};
+  // Adding a way to track last activation time to rate limit the on_frame_update call in the main ESP32 cpp loop
+  uint32_t last_trigger_ms_{0};
 
   static constexpr bool     kCoalesceMoves  = cfg::coalesce_moves;
   static constexpr uint32_t kMoveRateHz     = cfg::move_rate_hz;
