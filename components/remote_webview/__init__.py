@@ -4,7 +4,7 @@ import esphome.config_validation as cv
 from esphome import automation
 from esphome.components import display, touchscreen
 from esphome.components.display import validate_rotation
-from esphome.const import CONF_ID, CONF_DISPLAY_ID, CONF_URL, CONF_ROTATION, CONF_STATE, CONF_TRIGGER_ID
+from esphome.const import CONF_ID, CONF_DISPLAY_ID, CONF_URL, CONF_ROTATION, CONF_TRIGGER_ID
 
 
 CONF_DEVICE_ID = "device_id"
@@ -48,18 +48,26 @@ RemoteWebView = ns.class_("RemoteWebView", cg.Component)
 
 # on_frame_update automation items
 # Actions
-OnFrameUpdateSetStateAction = ns.class_(
-    "OnFrameUpdateSetStateAction", automation.Action
+# MODIFIED: Renamed the class variable to match the updated C++ class
+TriggerOnFrameUpdateAction = ns.class_(
+    "TriggerOnFrameUpdateAction", automation.Action
 )
+#OnFrameUpdateSetStateAction = ns.class_(
+#    "OnFrameUpdateSetStateAction", automation.Action
+#)
 # Conditions
 # Culling conditions because we only have a simple trigger on our automation
 #OnFrameUpdateCondition = ns.class_(
 #    "OnFrameUpdateCondition", automation.Condition
 #)
 # Triggers
-OnFrameUpdateStateTrigger = ns.class_(
-    "OnFrameUpdateStateTrigger", automation.Trigger.template(bool)
+# MODIFIED: Renamed and removed the .template(bool). It's just a blank template() now.
+OnFrameUpdateTrigger = ns.class_(
+    "OnFrameUpdateTrigger", automation.Trigger.template()
 )
+#OnFrameUpdateStateTrigger = ns.class_(
+#    "OnFrameUpdateStateTrigger", automation.Trigger.template(bool)
+#)
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -84,19 +92,27 @@ CONFIG_SCHEMA = cv.Schema(
         
         cv.Optional(CONF_ON_FRAME_UPDATE): automation.validate_automation(
             {
-                cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(OnFrameUpdateStateTrigger),
+                # MODIFIED: Use the newly renamed Trigger class
+                cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(OnFrameUpdateTrigger),
+                #cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(OnFrameUpdateStateTrigger),
             }
         ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
-REMOTEWEBVIEW_ACTION_SCHEMA = cv.maybe_simple_value(
+# MODIFIED: Simplified the action schema. It no longer needs to validate CONF_STATE.
+REMOTEWEBVIEW_ACTION_SCHEMA = cv.Schema(
     {
         cv.Required(CONF_ID): cv.use_id(RemoteWebView),
-        cv.Required(CONF_STATE): cv.boolean,
-    },
-    key=CONF_STATE,
+    }
 )
+#REMOTEWEBVIEW_ACTION_SCHEMA = cv.maybe_simple_value(
+#    {
+#        cv.Required(CONF_ID): cv.use_id(RemoteWebView),
+#        cv.Required(CONF_STATE): cv.boolean,
+#    },
+#    key=CONF_STATE,
+#)
 
 # another condition automation element that we don't need
 """
@@ -107,16 +123,28 @@ REMOTEWEBVIEW_CONDITION_SCHEMA = automation.maybe_simple_id(
 )
 """
 
+# MODIFIED: Changed the YAML action name to your desired "remote_webview.trigger_on_frame_update".
+# Tied it to our updated C++ class and simplified schema.
 @automation.register_action(
-    "remote_webview.set_state",
-    OnFrameUpdateSetStateAction,
+    "remote_webview.trigger_on_frame_update",
+    TriggerOnFrameUpdateAction,
     REMOTEWEBVIEW_ACTION_SCHEMA,
 )
-async def remote_webview_frame_update_trigger_to_code(config, action_id, template_arg, args):
+#@automation.register_action(
+#    "remote_webview.set_state",
+#    OnFrameUpdateSetStateAction,
+#    REMOTEWEBVIEW_ACTION_SCHEMA,
+#)
+async def remote_webview_trigger_on_frame_update_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    cg.add(var.set_state(config[CONF_STATE]))
-    return var
+    # MODIFIED: Just create the variable. We don't need to add a cg.add(...) line 
+    # to set the state since the C++ play() method handles the trigger.
+    return cg.new_Pvariable(action_id, template_arg, paren)
+#async def remote_webview_frame_update_trigger_to_code(config, action_id, template_arg, args):
+#    paren = await cg.get_variable(config[CONF_ID])
+#    var = cg.new_Pvariable(action_id, template_arg, paren)
+#    cg.add(var.set_state(config[CONF_STATE]))
+#    return var
 
 # Trying to cull extra things in the Automation that might not be necessary
 """
@@ -184,6 +212,8 @@ async def to_code(config):
 
     for conf in config.get(CONF_ON_FRAME_UPDATE, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
-        await automation.build_automation(trigger, [(bool, "x")], conf)
+        # MODIFIED: Changed from [(bool, "x")] to [] since no arguments are passed during the trigger.
+        await automation.build_automation(trigger, [], conf)
+        #await automation.build_automation(trigger, [(bool, "x")], conf)
 
 
