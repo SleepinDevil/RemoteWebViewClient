@@ -2,6 +2,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/display/display.h"
 #include "esphome/components/touchscreen/touchscreen.h"
+#include "esphome/components/text_sensor/text_sensor.h"
 #include "esphome/core/helpers.h"
 #include "JPEGDEC.h"
 #include "protocol.h"
@@ -63,6 +64,9 @@ class RemoteWebView : public Component {
   //void set_state(bool state);
   //bool state{false}; // COMMENTED OUT: We do not need a state variable for a momentary event.
 
+  // Current URL display is showing processor function
+  void set_url_sensor(text_sensor::TextSensor *s) { url_sensor_ = s; }
+
  private:
   struct WsMsg {
     uint8_t *buf{nullptr};
@@ -80,6 +84,10 @@ class RemoteWebView : public Component {
   //CallbackManager<void(bool)> state_callback_{};
   // Adding a way to track last activation time to rate limit the on_frame_update call in the main ESP32 cpp loop
   uint32_t last_trigger_ms_{0};
+
+  // Current URL processor function
+  text_sensor::TextSensor *url_sensor_{nullptr};
+  void process_current_url_packet_(const uint8_t *data, size_t len);
 
   static constexpr bool     kCoalesceMoves  = cfg::coalesce_moves;
   static constexpr uint32_t kMoveRateHz     = cfg::move_rate_hz;
