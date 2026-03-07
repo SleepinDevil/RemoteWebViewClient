@@ -27,7 +27,7 @@ _SERVER_RE = re.compile(
     r"^(?P<host>[A-Za-z0-9](?:[A-Za-z0-9\-\.]*[A-Za-z0-9])?)\:(?P<port>\d{1,5})$"
 )
 
-AUTO_LOAD = []
+AUTO_LOAD = ["text_sensor"]
 DEPENDENCIES = ["display"]
 
 def validate_host_port(value):
