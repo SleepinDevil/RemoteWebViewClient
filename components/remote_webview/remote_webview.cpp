@@ -50,6 +50,22 @@ void RemoteWebView::trigger_on_frame_update() {
 //  this->state_callback_.call(state);
 //}
 
+// This is the display current URL processor main function to decode the packet and do things:
+void RemoteWebView::process_current_url_packet_(const uint8_t *data, size_t len) {
+  if (!data || len < sizeof(proto::CurrentURLHeader)) return;
+  
+  auto *hdr = reinterpret_cast<const proto::CurrentURLHeader *>(data);
+  if (sizeof(proto::CurrentURLHeader) + hdr->url_len > len) return; // Malformed packet bounds check
+  
+  if (this->url_sensor_ != nullptr) {
+    // Extract the string using the length provided
+    std::string url(reinterpret_cast<const char*>(data + sizeof(proto::CurrentURLHeader)), hdr->url_len);
+    
+    // Publish it to ESPHome so automations can use it
+    this->url_sensor_->publish_state(url);
+    ESP_LOGD(TAG, "Current Server URL updated: %s", url.c_str());
+  }
+}
 
 static inline void websocket_force_reconnect(esp_websocket_client_handle_t client) {
   if (!client) return;
@@ -332,6 +348,9 @@ void RemoteWebView::process_packet_(void * /*client*/, const uint8_t *data, size
       break;
     case proto::MsgType::FrameStats:
       process_frame_stats_packet_(data, len);
+      break;
+    case proto::MsgType::CurrentURL: // deal with packet #6 here - aka our current display URL packet
+      process_current_url_packet_(data, len);
       break;
     default:
       ESP_LOGW(TAG, "unknown packet type: %d", (int)type);
