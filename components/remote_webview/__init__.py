@@ -21,7 +21,7 @@ CONF_MAX_BYTES_PER_MSG = "max_bytes_per_msg"
 CONF_BIG_ENDIAN = "big_endian"
 
 CONF_ON_FRAME_UPDATE = "on_frame_update"
-CONF_CURRENT_URL_DISPLAYED = "current_url_displayed"
+CONF_CURRENT_URL_DISPLAYED = "current_url_sensor"
 
 _SERVER_RE = re.compile(
     r"^(?P<host>[A-Za-z0-9](?:[A-Za-z0-9\-\.]*[A-Za-z0-9])?)\:(?P<port>\d{1,5})$"
