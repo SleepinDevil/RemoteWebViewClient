@@ -2,7 +2,7 @@ import re
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import display, touchscreen
+from esphome.components import display, touchscreen, text_sensor
 from esphome.components.display import validate_rotation
 from esphome.const import CONF_ID, CONF_DISPLAY_ID, CONF_URL, CONF_ROTATION, CONF_TRIGGER_ID
 
@@ -21,6 +21,7 @@ CONF_MAX_BYTES_PER_MSG = "max_bytes_per_msg"
 CONF_BIG_ENDIAN = "big_endian"
 
 CONF_ON_FRAME_UPDATE = "on_frame_update"
+CONF_CURRENT_URL_DISPLAYED = "current_url_displayed"
 
 _SERVER_RE = re.compile(
     r"^(?P<host>[A-Za-z0-9](?:[A-Za-z0-9\-\.]*[A-Za-z0-9])?)\:(?P<port>\d{1,5})$"
@@ -97,6 +98,7 @@ CONFIG_SCHEMA = cv.Schema(
                 #cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(OnFrameUpdateStateTrigger),
             }
         ),
+        cv.Optional(CONF_CURRENT_URL_DISPLAYED): text_sensor.text_sensor_schema(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -216,4 +218,8 @@ async def to_code(config):
         await automation.build_automation(trigger, [], conf)
         #await automation.build_automation(trigger, [(bool, "x")], conf)
 
+    # lets show the current url displayed
+    if CONF_CURRENT_URL_DISPLAYED in config:
+        sens = await text_sensor.new_text_sensor(config[CONF_CURRENT_URL_DISPLAYED])
+        cg.add(var.set_url_sensor(sens)) 
 
