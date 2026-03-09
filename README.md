@@ -2,7 +2,7 @@
 >
 > **_About this fork_**
 >
-> The modifications done in my server fork are: 
+> The modifications done in my client fork are: 
 > 1. Provide an "on_frame_update" event on the remote_webview whenever the display frame gets updated, this can be used to trigger a brightness script for example. This triggers a maximum of once every second.
 > 2. Provide a "current_url_sensor" sensor on the remote_webview that processes Packet #6 that my server code sends. You need to have my server code running on your docker container for this sensor to get populated, otherwise it will remain "unknown".
 
