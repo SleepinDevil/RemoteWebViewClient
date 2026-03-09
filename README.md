@@ -91,6 +91,7 @@ esphome:
       - light.turn_on:
           id: back_light
           brightness: !lambda return int( id(sd_backlight_brightness).state )/ 100.0;
+      - script.execute: about_blank_stuck
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -315,7 +316,7 @@ script:
           transition_length: 3s
           brightness_limits:
             min_brightness: 30%
-  - id: about_black_stuck
+  - id: about_blank_stuck
     mode: restart
     then:
       - delay: 30s
