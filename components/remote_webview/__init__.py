@@ -48,27 +48,14 @@ ns = cg.esphome_ns.namespace("remote_webview")
 RemoteWebView = ns.class_("RemoteWebView", cg.Component)
 
 # on_frame_update automation items
-# Actions
-# MODIFIED: Renamed the class variable to match the updated C++ class
+# Action
 TriggerOnFrameUpdateAction = ns.class_(
     "TriggerOnFrameUpdateAction", automation.Action
 )
-#OnFrameUpdateSetStateAction = ns.class_(
-#    "OnFrameUpdateSetStateAction", automation.Action
-#)
-# Conditions
-# Culling conditions because we only have a simple trigger on our automation
-#OnFrameUpdateCondition = ns.class_(
-#    "OnFrameUpdateCondition", automation.Condition
-#)
-# Triggers
-# MODIFIED: Renamed and removed the .template(bool). It's just a blank template() now.
+# Trigger
 OnFrameUpdateTrigger = ns.class_(
     "OnFrameUpdateTrigger", automation.Trigger.template()
 )
-#OnFrameUpdateStateTrigger = ns.class_(
-#    "OnFrameUpdateStateTrigger", automation.Trigger.template(bool)
-#)
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -93,86 +80,30 @@ CONFIG_SCHEMA = cv.Schema(
         
         cv.Optional(CONF_ON_FRAME_UPDATE): automation.validate_automation(
             {
-                # MODIFIED: Use the newly renamed Trigger class
                 cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(OnFrameUpdateTrigger),
-                #cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(OnFrameUpdateStateTrigger),
             }
         ),
         cv.Optional(CONF_CURRENT_URL_DISPLAYED): text_sensor.text_sensor_schema(),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
-# MODIFIED: Simplified the action schema. It no longer needs to validate CONF_STATE.
+# Action Schema for the automation
 REMOTEWEBVIEW_ACTION_SCHEMA = cv.Schema(
     {
         cv.Required(CONF_ID): cv.use_id(RemoteWebView),
     }
 )
-#REMOTEWEBVIEW_ACTION_SCHEMA = cv.maybe_simple_value(
-#    {
-#        cv.Required(CONF_ID): cv.use_id(RemoteWebView),
-#        cv.Required(CONF_STATE): cv.boolean,
-#    },
-#    key=CONF_STATE,
-#)
 
-# another condition automation element that we don't need
-"""
-REMOTEWEBVIEW_CONDITION_SCHEMA = automation.maybe_simple_id(
-    {
-        cv.Required(CONF_ID): cv.use_id(RemoteWebView),
-    }
-)
-"""
-
-# MODIFIED: Changed the YAML action name to your desired "remote_webview.trigger_on_frame_update".
-# Tied it to our updated C++ class and simplified schema.
+# Automation register
 @automation.register_action(
     "remote_webview.trigger_on_frame_update",
     TriggerOnFrameUpdateAction,
     REMOTEWEBVIEW_ACTION_SCHEMA,
 )
-#@automation.register_action(
-#    "remote_webview.set_state",
-#    OnFrameUpdateSetStateAction,
-#    REMOTEWEBVIEW_ACTION_SCHEMA,
-#)
+
 async def remote_webview_trigger_on_frame_update_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
-    # MODIFIED: Just create the variable. We don't need to add a cg.add(...) line 
-    # to set the state since the C++ play() method handles the trigger.
     return cg.new_Pvariable(action_id, template_arg, paren)
-#async def remote_webview_frame_update_trigger_to_code(config, action_id, template_arg, args):
-#    paren = await cg.get_variable(config[CONF_ID])
-#    var = cg.new_Pvariable(action_id, template_arg, paren)
-#    cg.add(var.set_state(config[CONF_STATE]))
-#    return var
-
-# Trying to cull extra things in the Automation that might not be necessary
-"""
-@automation.register_condition(
-    "remote_webview.component_on",
-    OnFrameUpdateCondition,
-    REMOTEWEBVIEW_CONDITION_SCHEMA,
-)
-async def remote_webview_component_on_to_code(
-    config, condition_id, template_arg, args
-):
-    paren = await cg.get_variable(config[CONF_ID])
-    return cg.new_Pvariable(condition_id, template_arg, paren, True)
-
-
-@automation.register_condition(
-    "remote_webview.component_off",
-    OnFrameUpdateCondition,
-    REMOTEWEBVIEW_CONDITION_SCHEMA,
-)
-async def remote_webview_component_off_to_code(
-    config, condition_id, template_arg, args
-):
-    paren = await cg.get_variable(config[CONF_ID])
-    return cg.new_Pvariable(condition_id, template_arg, paren, False)
-"""
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
@@ -214,11 +145,9 @@ async def to_code(config):
 
     for conf in config.get(CONF_ON_FRAME_UPDATE, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
-        # MODIFIED: Changed from [(bool, "x")] to [] since no arguments are passed during the trigger.
         await automation.build_automation(trigger, [], conf)
-        #await automation.build_automation(trigger, [(bool, "x")], conf)
-
-    # lets show the current url displayed
+        
+    # Current URL sensor
     if CONF_CURRENT_URL_DISPLAYED in config:
         sens = await text_sensor.new_text_sensor(config[CONF_CURRENT_URL_DISPLAYED])
         cg.add(var.set_url_sensor(sens)) 
