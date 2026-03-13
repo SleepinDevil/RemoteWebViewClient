@@ -56,13 +56,8 @@ class RemoteWebView : public Component {
   float get_setup_priority() const override { return setup_priority::LATE; }
 
   // Automation on_update_frame things
-  // MODIFIED: Removed the 'bool' argument from the std::function. It's now a pure event.
   void add_on_frame_update_callback(std::function<void()> &&callback);
-  //void add_on_state_callback(std::function<void(bool)> &&callback);
-  // MODIFIED: Renamed to clearly state its purpose and removed the 'bool' argument.
   void trigger_on_frame_update();
-  //void set_state(bool state);
-  //bool state{false}; // COMMENTED OUT: We do not need a state variable for a momentary event.
 
   // Current URL display is showing processor function
   void set_url_sensor(text_sensor::TextSensor *s) { url_sensor_ = s; }
@@ -79,9 +74,7 @@ class RemoteWebView : public Component {
   };
 
   // Automation on_update_frame things
-  // MODIFIED: Changed CallbackManager to no longer expect a boolean parameter.
   CallbackManager<void()> on_frame_update_callback_{};
-  //CallbackManager<void(bool)> state_callback_{};
   // Adding a way to track last activation time to rate limit the on_frame_update call in the main ESP32 cpp loop
   uint32_t last_trigger_ms_{0};
 
