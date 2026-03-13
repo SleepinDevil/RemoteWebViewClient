@@ -214,7 +214,7 @@ text:
 
 ## On-screen keyboard
 
-There is a Javascript injected on-screen keyboard with the Latin/English alphabet. Simply click into input elements that allow Keyboard inputs and the Javascript keyboard should pop up.
+There is a Javascript based on-screen keyboard with the Latin/English alphabet. Simply click into input elements that allow Keyboard inputs and the Javascript keyboard should pop up.
 
 <img src="images/osk-1.png" height="250px"><img src="images/osk-2.png" height="250px"><img src="images/osk-3.png" height="250px">
 
