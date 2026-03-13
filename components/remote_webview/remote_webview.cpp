@@ -20,14 +20,9 @@ static const char *const TAG = "Remote_WebView";
 RemoteWebView *RemoteWebView::self_ = nullptr;
 
 //Below two functions are part of automation template testing
-// MODIFIED: Updated signature to not require a boolean. Added our callback manager.
 void RemoteWebView::add_on_frame_update_callback(std::function<void()> &&callback) {
   this->on_frame_update_callback_.add(std::move(callback));
 }
-//void RemoteWebView::add_on_state_callback(std::function<void(bool)> &&callback) {
-//  this->state_callback_.add(std::move(callback));
-//}
-// MODIFIED: Renamed function and removed the 'state' logic. It simply fires the callbacks.
 void RemoteWebView::trigger_on_frame_update() {
   uint32_t now = millis();
   
@@ -40,15 +35,7 @@ void RemoteWebView::trigger_on_frame_update() {
   
   ESP_LOGD(TAG, "Triggering the on_frame_update automation");
   this->on_frame_update_callback_.call();
-  // ESP_LOGD(TAG, "Triggering the on_frame_update automation");
-  // this->state = state; // COMMENTED OUT: Unnecessary state assignment.
-  //this->on_frame_update_callback_.call();
 }
-//void RemoteWebView::set_state(bool state) {
-//  ESP_LOGD(TAG, "Triggering the automation with a %s value (value does not matter)", TRUEFALSE(state));
-//  this->state = state;
-//  this->state_callback_.call(state);
-//}
 
 // This is the display current URL processor main function to decode the packet and do things:
 void RemoteWebView::process_current_url_packet_(const uint8_t *data, size_t len) {
@@ -400,9 +387,7 @@ void RemoteWebView::process_frame_packet_(const uint8_t *data, size_t len)
     ESP_LOGD(TAG, "frame %lu: tiles %u (%u bytes) - %lu ms", frame_id_, frame_tiles_, frame_bytes_, time_ms);
 
     // LCD screen has had an update, lets trigger the automation
-    // MODIFIED: Replaced set_state(true) with our new, cleaner trigger method.
     trigger_on_frame_update();
-    //set_state(true);
   }
 }
 
