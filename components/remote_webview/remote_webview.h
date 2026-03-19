@@ -62,6 +62,9 @@ class RemoteWebView : public Component {
   // Current URL display is showing processor function
   void set_url_sensor(text_sensor::TextSensor *s) { url_sensor_ = s; }
 
+  // Expose a lambda function to check current URL shown in server
+  std::string get_current_url() const;
+
  private:
   struct WsMsg {
     uint8_t *buf{nullptr};
