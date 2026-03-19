@@ -3,7 +3,7 @@ substitutions:
 
 esphome:
   name: "webview-display-1"
-  friendly_name: Webview-Display-1
+  friendly_name: Webview Display 1
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
@@ -32,8 +32,9 @@ esp32:
       - name: "espressif/esp_websocket_client"
         ref: 1.5.0
       - name: "bitbank2/jpegdec"
-        source: https://github.com/SleepinDevil/jpegdec-esphome # this is SleepinDevil's optimised JPEG Decoder
-        # source: https://github.com/strange-v/jpegdec-esphome
+        source: https://github.com/SleepinDevil/jpegdec-esphome
+        # yes I have also been experimenting with some optimisations on the JPEG Decoder
+        #source: https://github.com/strange-v/jpegdec-esphome
 
 psram:
   mode: octal
@@ -41,6 +42,7 @@ psram:
 
 external_components:
   - source: github://strange-v/RemoteWebViewClient@main
+  #- source: github://SleepinDevil/RemoteWebViewClient@pr-url_packet-on_frame_update
     refresh: 0s
     components: [ remote_webview ]
 
@@ -194,8 +196,8 @@ remote_webview:
   #url: "self-test"
   full_frame_tile_count: 2
   tile_size: 32
-  full_frame_every: 60
-  min_frame_interval: 60 
+  full_frame_every: 10
+  min_frame_interval: 65 
   # if you are using SleepinDevil/jpegdec-esphome, then you can try 60 min_frame_interval and jpeg_quality 95
   max_bytes_per_msg: 61440
   jpeg_quality: 95
@@ -247,7 +249,10 @@ script:
       - delay: 30s
       - if: 
           condition:
-            lambda: 'return (id(current_url_sensor_id).state == "unknown" || id(current_url_sensor_id).state == "Unknown");'
+            lambda: |-
+              std::string server_url = id(current_url_sensor_id).state;
+              ESP_LOGI("remote_webview", "URL Sensor Text:%s. Empty:%d. Length:%d.", server_url.c_str(), server_url.empty(), server_url.length() );
+              return (server_url.empty() || server_url.length() < 10 || server_url == "unknown" || server_url == "Unknown" );
           then:
             - logger.log: "Current displayed URL is 'Unknown', let's attempt to set it again."
             - lambda: |-
