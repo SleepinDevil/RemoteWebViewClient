@@ -54,6 +54,15 @@ void RemoteWebView::process_current_url_packet_(const uint8_t *data, size_t len)
   }
 }
 
+// This function exposes the current URL from server to lambda functions
+std::string RemoteWebView::get_current_url() const {
+  // Check if the sensor was configured in YAML and has received a value
+  if (this->url_sensor_ != nullptr && this->url_sensor_->has_state()) {
+    return this->url_sensor_->state;
+  }
+  return ""; // Return an empty string if there is no URL yet
+}
+
 static inline void websocket_force_reconnect(esp_websocket_client_handle_t client) {
   if (!client) return;
   esp_websocket_client_stop(client);
